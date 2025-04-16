@@ -10,8 +10,9 @@ const directionToNextQuestion = document.getElementById("directionToNext")
 
 let questionCount = 0
 let correctAnswers = 0
+let questionNr = 0
 
-const pos0 = {name: "Fråga 1", lat: 59.104662, lon: 17.515126}
+const pos0 = {name: "Fråga 1", lat: 59.104757, lon: 17.511706}
 const pos1 = {name: "Fråga 2", lat: 59.104665, lon: 17.515297}
 const pos2 = {name: "Fråga 3", lat: 59.103868, lon: 17.519358}
 const pos3 = {name: "Fråga 4", lat: 59.102370, lon: 17.521541}
@@ -27,7 +28,7 @@ const positions = [pos0, pos1, pos2, pos3, pos4, pos5, pos6, pos7, pos8, pos9]
 
 let results = []
 
-setInterval(geoFindMe, 10000)
+myInterval = setInterval(geoFindMe, 10000)
 
 
 fetch(url)
@@ -51,6 +52,7 @@ fetch(url)
 
 function createQuestion(index)
 {
+    questionNr++
     q = results[index]
         console.log(q)
         let card = document.createElement("div")
@@ -112,6 +114,7 @@ function delQForm()
 
 function answer(outcome, index)
         {
+            myInterval = setInterval(geoFindMe, 10000)
             console.log(outcome)
             if(outcome == true)
             {
@@ -150,75 +153,74 @@ function geoFindMe()
         let longitude  = position.coords.longitude;
         console.log("lat: " + latitude)
         console.log("lon: " + longitude)
+        console.log(positions[questionNr].lat)
+        console.log(positions[questionNr].lon)
         let accuracy = position.coords.accuracy;
 
-        
-
-        for(let i = 0; i < positions.length; i++)
+        let distance = getDistance(latitude, longitude, positions[questionNr].lat, positions[questionNr].lon, "K")
+        let minDiff = 0.000100
+        if(distance < 0.05 && results[questionNr].type != "Shown")
         {
-            let distance = getDistance(latitude, longitude, positions[i].lat, positions[i].lon, "K")
+            openStreetMap(positions[questionNr].lat, positions[questionNr].lon)
+            clearInterval(myInterval)
+            questionCount++
+            qFound.innerHTML = "Questions found: " + questionCount
+            console.log("Creating question")
+            results[questionNr].type = "Shown"
             let minDiff = 0.000100
-            if(distance < 0.005 && results[i].type != "Shown")
+            if(questionNr+1 < positions.length)
+            {
+                let distToNext = getDistance(latitude, longitude, positions[questionNr+1].lat, positions[questionNr+1].lon, "K")
+                distanceToNextQuestion.innerHTML = "Distance to next question: " + distToNext.toFixed(2) + "km"
+
+                let direction = ""
+                
+                if(longitude < positions[questionNr+1].lon && (longitude - positions[questionNr+1].lon) > minDiff)
                 {
-                    openStreetMap(positions[i].lat, positions[i].lon)
-                    clearInterval()
-                    questionCount++
-                    qFound.innerHTML = "Questions found: " + questionCount
-                    console.log("Creating question")
-                    results[i].type = "Shown"
-                    let minDiff = 0.000100
-                    if(i+1 < positions.length)
-                        {
-                            let distToNext = getDistance(latitude, longitude, positions[i+1].lat, positions[i+1].lon, "K")
-                            distanceToNextQuestion.innerHTML = "Distance to next question: " + distToNext.toFixed(2) + "km"
-                            
-                            let direction = ""
-                            if(longitude > positions[i+1].lon && (longitude - positions[i+1].lon) > minDiff)
-                            {
-                                direction += "South "
-                            }
-                            else if(longitude < positions[i+1].lon && (positions[i+1].lon - longitude) > minDiff)
-                            {
-                                direction += "North "
-                            }
-                            if(latitude > positions[i+1].lat && (latitude - positions[i+1].lat) > minDiff)
-                                {
-                                    direction += "West"
-                                }
-                                else if(latitude < positions[i+1].lat && (positions[i+1].lat - latitude) > minDiff)
-                                {
-                                    direction += "East"
-                                }
-                            directionToNextQuestion.innerHTML = "Direction to next question is: " + direction
-                        }
-                    createQuestion(i);
-                    
+                    direction += "North "
                 }
-                else
+                else if(longitude > positions[questionNr+1].lon && (positions[questionNr+1].lon - longitude) > minDiff)
                 {
-                    openStreetMap(latitude, longitude)
-                    let distToNext = getDistance(latitude, longitude, positions[i].lat, positions[i].lon, "K")
-                            distanceToNextQuestion.innerHTML = "Distance to next question: " + distToNext.toFixed(2) + "km"
-                            let direction = ""
-                            if(longitude > positions[i].lon && (longitude - positions[i].lon) > minDiff)
-                            {
-                                direction = "North "
-                            }
-                            else if(longitude < positions[i].lon && (positions[i].lon - longitude) > minDiff)
-                            {
-                                direction = "South "
-                            }
-                            if(latitude > positions[i].lat && (latitude - positions[i].lat) > minDiff)
-                                {
-                                    direction += "East"
-                                }
-                                else if(latitude < positions[i].lat && (positions[i].lat - latitude) > minDiff)
-                                {
-                                    direction += "West"
-                                }
-                            directionToNextQuestion.innerHTML = "Direction to next question is: " + direction
+                    direction += "South "
                 }
+                if(latitude > positions[questionNr+1].lat && (latitude - positions[questionNr+1].lat) > minDiff)
+                    {
+                        direction += "West "
+                    }
+                    else if(latitude < positions[questionNr+1].lat && (positions[questionNr+1].lat - latitude) > minDiff)
+                    {
+                        direction += "East "
+                    }
+
+                directionToNextQuestion.innerHTML = "Direction to next question is: " + direction
+            }
+            createQuestion(questionNr);        
         }
+        else
+        {
+            openStreetMap(positions[questionNr].lat, positions[questionNr].lon)
+            let distToNext = getDistance(latitude, longitude, positions[questionNr].lat, positions[questionNr].lon, "K")
+            distanceToNextQuestion.innerHTML = "Distance to next question: " + distToNext.toFixed(2) + "km"
+            let direction = ""
+            if(longitude < positions[questionNr].lon)
+            {
+                direction = "North "
+            }
+            else if(longitude > positions[questionNr].lon)
+            {
+                direction = "South "
+            }
+            if(latitude > positions[questionNr].lat)
+            {
+                direction += "West"
+            }
+            else if(latitude < positions[questionNr].lat)
+            {
+                direction += "East"
+            }
+            directionToNextQuestion.innerHTML = "Direction to next question is: " + direction
+        }
+        
     }
 
     function fel(error)
