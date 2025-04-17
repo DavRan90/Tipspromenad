@@ -33,7 +33,7 @@ const positions = [pos0, pos1, pos2, pos3, pos4, pos5, pos6, pos7, pos8, pos9]
 
 let results = []
 
-myInterval = setInterval(geoFindMe, 10000)
+myInterval = setInterval(geoFindMe, 5000)
 
 
 
@@ -120,7 +120,7 @@ function delQForm()
 
 function answer(outcome, index)
         {
-            myInterval = setInterval(geoFindMe, 10000)
+            myInterval = setInterval(geoFindMe, 5000)
             console.log(outcome)
             if(outcome == true)
             {
@@ -160,8 +160,8 @@ function geoFindMe()
         let longitude  = position.coords.longitude;
         console.log("lat: " + latitude)
         console.log("lon: " + longitude)
-        currentPosition.innerHTML = "Current: Lat: " + latitude + " lon: " + longitude
-        targetPosition.innerHTML = "Target: Lat: " + positions[questionNr].lat + " lon: " + positions[questionNr].lon
+        currentPosition.innerHTML = "Current:<br>Lat: " + latitude + "<br>Lon: " + longitude
+        targetPosition.innerHTML = "Target:<br>Lat: " + positions[questionNr].lat + "<br>Lon: " + positions[questionNr].lon
 
         let accuracy = position.coords.accuracy;
 
@@ -210,22 +210,24 @@ function geoFindMe()
             let distToNext = getDistance(latitude, longitude, positions[questionNr].lat, positions[questionNr].lon, "K")
             distanceToNextQuestion.innerHTML = "Distance to next question: " + distToNext.toFixed(2) + "km"
             let direction = ""
-            if(longitude < positions[questionNr].lon)
-            {
-                direction = "North "
-            }
-            else if(longitude > positions[questionNr].lon)
-            {
-                direction = "South "
-            }
+            
             if(latitude > positions[questionNr].lat)
             {
-                direction += "West"
+                direction += "South "
             }
             else if(latitude < positions[questionNr].lat)
             {
-                direction += "East"
+                direction += "North "
             }
+            if(longitude < positions[questionNr].lon)
+                {
+                    direction += "East"
+                }
+                else if(longitude > positions[questionNr].lon)
+                {
+                    direction += "West"
+                }
+
             directionToNextQuestion.innerHTML = "Direction to next question is: " + direction
         }
         
