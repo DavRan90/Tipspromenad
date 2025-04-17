@@ -1,12 +1,17 @@
 document.getElementById("findme").addEventListener("click", geoFindMe)
 document.getElementById("quit").addEventListener("click", quit)
+document.getElementById("prevQuestion").addEventListener("click", prevQuestion)
+document.getElementById("nextQuestion").addEventListener("click", nextQuestion)
 
 const url = "https://opentdb.com/api.php?amount=10&category=12&difficulty=medium&type=multiple"
 const quiz = document.getElementById("quiz")
 const qFound = document.getElementById("q")
 const aCorr = document.getElementById("a")
+const currentQuestion = document.getElementById("currentQ")
 const distanceToNextQuestion = document.getElementById("distanceToNext")
 const directionToNextQuestion = document.getElementById("directionToNext")
+const currentPosition = document.getElementById("currentPos")
+const targetPosition = document.getElementById("targetPos")
 
 let questionCount = 0
 let correctAnswers = 0
@@ -20,8 +25,8 @@ const pos4 = {name: "Fråga 5", lat: 59.101276, lon: 17.525028}
 const pos5 = {name: "Fråga 6", lat: 59.099869, lon: 17.524154}
 const pos6 = {name: "Fråga 7", lat: 59.097568, lon: 17.516638}
 const pos7 = {name: "Fråga 8", lat: 59.097244, lon: 17.505222}
-const pos8 = {name: "Fråga 9", lat: 59.06080, lon: 17.505209}
-const pos9 = {name: "Fråga 10", lat: 59.100203, lon: 17.509289}
+const pos8 = {name: "Fråga 9", lat: 59.100203, lon: 17.505191}
+const pos9 = {name: "Fråga 10", lat: 59.105091, lon: 17.509434}
 
 
 const positions = [pos0, pos1, pos2, pos3, pos4, pos5, pos6, pos7, pos8, pos9]
@@ -29,6 +34,7 @@ const positions = [pos0, pos1, pos2, pos3, pos4, pos5, pos6, pos7, pos8, pos9]
 let results = []
 
 myInterval = setInterval(geoFindMe, 10000)
+
 
 
 fetch(url)
@@ -137,6 +143,7 @@ function answer(outcome, index)
 
 function geoFindMe()
 {
+    currentQuest()
     if(!navigator.geolocation)
     {
         alert("Du har ingen GPS-funktion")
@@ -153,13 +160,14 @@ function geoFindMe()
         let longitude  = position.coords.longitude;
         console.log("lat: " + latitude)
         console.log("lon: " + longitude)
-        console.log(positions[questionNr].lat)
-        console.log(positions[questionNr].lon)
+        currentPosition.innerHTML = "Current: Lat: " + latitude + " lon: " + longitude
+        targetPosition.innerHTML = "Target: Lat: " + positions[questionNr].lat + " lon: " + positions[questionNr].lon
+
         let accuracy = position.coords.accuracy;
 
         let distance = getDistance(latitude, longitude, positions[questionNr].lat, positions[questionNr].lon, "K")
         let minDiff = 0.000100
-        if(distance < 0.05 && results[questionNr].type != "Shown")
+        if(distance < 0.09 && results[questionNr].type != "Shown")
         {
             openStreetMap(positions[questionNr].lat, positions[questionNr].lon)
             clearInterval(myInterval)
@@ -266,4 +274,28 @@ function quit()
     aCorr.innerHTML = "You ended up getting " + correctAnswers + " correct answers"
     let playButton = document.getElementById("findme")
     playButton.setAttribute("class", "hidden")
+}
+
+function nextQuestion()
+{
+    if(questionNr < 9)
+    {
+        questionNr++
+        geoFindMe()
+    }
+    
+}
+
+function prevQuestion()
+{
+    if(questionNr > 0)
+        {
+            questionNr--
+            geoFindMe()
+        }
+}
+
+function currentQuest()
+{
+    currentQuestion.innerHTML = "Looking for question number " + (questionNr + 1)
 }
