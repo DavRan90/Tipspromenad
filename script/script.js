@@ -271,7 +271,7 @@ function geoFindMe()
 
 function quit()
 {
-    clearInterval()
+    clearInterval(myInterval)
     qFound.innerHTML = "You found " + questionCount + " out of " + results.length + " questions"
     aCorr.innerHTML = "You ended up getting " + correctAnswers + " correct answers"
     let playButton = document.getElementById("findme")
