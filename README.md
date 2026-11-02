@@ -19,7 +19,4 @@ A browser-based geolocation trivia walk ("tipspromenad" = Swedish quiz walk). Wa
 ## Getting started  
   
 ```bash  
-git clone https://github.com/DavRan90/Tipspromenad.git  
-cd Tipspromenad  
-# Any static server works, e.g.:  [header-1](#header-1)
-python3 -m http.server 8000
+git clone https://github.com/DavRan90/Tipspromenad.git 
